@@ -1,52 +1,32 @@
-// const fs = require("fs")
 const fs = require("fs/promises")
 const path = require("path")
 
-// const sortFolder = (read, gender, write) => {
-//     fs.readdir(path.join(__dirname, read), (err, files) => {
-//         if (err) return console.log(err)
-//
-//         files.forEach((file) => {
-//             const folderPath = path.join(__dirname, read, file)
-//             fs.readFile(folderPath, (err, data) => {
-//                 if (err) console.log(err)
-//
-//                 const user = JSON.parse(data.toString())
-//
-//                 if (user.gender === gender) {
-//                     fs.rename(folderPath, path.join(__dirname, write, file), (err) => {
-//                         if (err) console.log(err)
-//                     })
-//                 }
-//             })
-//         })
-//     })
-// }
-//
-// sortFolder('girls', 'male', 'boys')
-// sortFolder('boys', 'female', 'girls')
 
-const sortFolder = async (read, gender, write) => {
+const reader = async (read) => {
     try {
-        const files = await fs.readdir(path.join(__dirname, read))
+        const files = await fs.readdir(read)
 
 
         for (const file of files) {
-            const folderPath = path.join(__dirname, read, file)
-            const data = await fs.readFile(folderPath)
+            const stat = await fs.stat(path.join(read, file))
 
-            const user = JSON.parse(data.toString())
 
-            if (user.gender === gender) {
-                await fs.rename(folderPath, path.join(__dirname, write, file))
+            if (stat.isFile()) {
+                await fs.rename(path.join(read, file), path.join(__dirname, "exitFolder",file))
+
             }
+            if (stat.isDirectory()) {
+                await reader(path.join(read, file))
+            }
+
         }
     } catch (e) {
         console.error(e)
     }
 }
 
+reader(path.join(__dirname, "folderForRead"))
 
-sortFolder('girls', 'male', 'boys')
-sortFolder('boys', 'female', 'girls')
+
+
 
